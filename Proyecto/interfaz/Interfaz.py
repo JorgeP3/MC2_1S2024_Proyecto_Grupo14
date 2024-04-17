@@ -80,9 +80,12 @@ class Interfaz:
 
     def agregarArista(self):
         vertice1=self.txtVertice1.get()
-        vertice2=self.txtVertice1.get()
+        vertice2=self.txtVertice2.get()
         
-        if vertice1 and vertice2 
+        if vertice1 and vertice2:
+            pass
+        else:
+            messagebox.showerror("Error", "vertice1 o vertice2 estan vacios")
 
 
     def generarGrafo(self):
