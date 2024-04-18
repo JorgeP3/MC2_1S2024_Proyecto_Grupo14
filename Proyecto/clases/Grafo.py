@@ -14,7 +14,7 @@ class Grafo:
         #si encuentra el vertice oriegn y destino agrega la arista si no marca error
         if origen in self.vertices and destino in self.vertices: 
             self.vertices[origen].append(destino)
-            self.vertices[destino].append(origen)
+            #self.vertices[destino].append(origen)
         else:
             messagebox.showerror("Error", "No se encontró el vertice origen o destino")
 
