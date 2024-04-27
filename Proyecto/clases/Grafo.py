@@ -3,7 +3,6 @@ from tkinter import messagebox
 class Grafo:
     def __init__(self):
         self.vertices = {}
-        #self.grafoG=nx.Graph()
 
     def agregar_vertice(self, vertice):
         if vertice not in self.vertices:#si el vertice no existe, lo grega si no marca error
