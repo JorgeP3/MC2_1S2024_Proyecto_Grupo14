@@ -1,0 +1,5 @@
+git fech (para ver las ramas que existen)
+git checkout nombre de la rama sin comillas (cambia de rama)
+
+git checkout -b nombre_sin_comillas (crea una nueva rama)
+git push origin rama_ (sube los commits a la rama)
