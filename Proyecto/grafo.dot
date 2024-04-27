@@ -1,7 +1,4 @@
 graph {
  node[shape=circle]
 rankdir="LR"a
-c
-d
-a--d
 }

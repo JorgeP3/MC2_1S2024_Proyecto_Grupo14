@@ -8,9 +8,10 @@ from tkinter import ttk
 from graphviz import Source
 from PIL import Image
 import io
+import networkx as nx 
 
-
-
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
 class Interfaz:
     def __init__(self,root:tk.Tk):
@@ -19,19 +20,20 @@ class Interfaz:
         self.root.geometry("800x600")
         self.root.configure(bg="lightblue")
         self.grafo=Grafo()
+        self.grafoG=nx.Graph()
 
         self.cargarWidgets()
 
     def cargarWidgets(self):
         
         #FRAME GRAFO
-        self.frmFrameGrafo=tk.Frame(self.root,width=325, height=325,borderwidth=2, relief="ridge", bg="lightgrey")
-        self.frmFrameGrafo.place(x=20,y=20)
+        self.frmGrafo=tk.Frame(self.root,width=325, height=325,borderwidth=2, relief="ridge", bg="lightgrey")
+        self.frmGrafo.place(x=20,y=20)
 
         
         #FRAME arbol
-        frmArbol=tk.Frame(self.root,width=325, height=325,borderwidth=2, relief="ridge", bg="lightgrey")
-        frmArbol.place(x=400,y=20)
+        self.frmArbol=tk.Frame(self.root,width=325, height=325,borderwidth=2, relief="ridge", bg="lightgrey")
+        self.frmArbol.place(x=400,y=20)
 
 
         #FRAME con los botones
@@ -43,6 +45,12 @@ class Interfaz:
 
         btnAgregarArista=tk.Button(frmControl,text="Agregar Arista",command=self.agregarArista)
         btnAgregarArista.place(x=10,y=60)
+
+        btnBusquedaAnchura=tk.Button(frmControl,text="Busqueda Anchura",command=self.busquedaAnchura)
+        btnBusquedaAnchura.place(x=10,y=120)
+
+        btnBusquedaProdundidad=tk.Button(frmControl,text="Busqueda Produndidad",command=self.busquedaProdundidad)
+        btnBusquedaProdundidad.place(x=10,y=150)
 
         self.txtVertice=tk.Entry(frmControl,)
         self.txtVertice.place(x=105,y=20)
@@ -59,6 +67,19 @@ class Interfaz:
 
         lblEntrada=tk.Label(frmControl,text="--",bg="lightgrey")
         lblEntrada.place(x=147,y=60)
+
+        #figura del grafo
+        figure = Figure(figsize=(3,3))
+        self.ax = figure.add_subplot(111)
+        self.canvas=FigureCanvasTkAgg(figure, self.frmGrafo)
+        self.canvas.get_tk_widget().pack()
+
+        #figura busqueda Anchura
+
+        figureAnchura = Figure(figsize=(3,3))
+        self.axAnchura = figureAnchura.add_subplot(111)
+        self.canvasAnchura=FigureCanvasTkAgg(figureAnchura, self.frmArbol)
+        self.canvasAnchura.get_tk_widget().pack()
 
 
     #agrega un vertice al grafo
@@ -77,7 +98,7 @@ class Interfaz:
                 self.txtListaVertices.insert("end",vertice)
 
             self.generarGrafo()
-            self.actualizarGrafo()
+            self.dibujargrafo()
         else:
             messagebox.showerror("Error", "No se ingresó ningun vertice")
 
@@ -98,11 +119,54 @@ class Interfaz:
                 self.txtListaAristas.insert("end",arista[0]+"--"+arista[1])
 
             self.generarGrafo()
-            self.actualizarGrafo()
+            self.dibujargrafo()
         else:
             messagebox.showerror("Error", "vertice1 o vertice2 estan vacios")
 
+    def generarGrafo(self):
+        lista_vertices=self.grafo.obtener_vertices()
+        lista_aristas=self.grafo.obtener_aristas()
 
+        for vertice in lista_vertices:
+            self.grafoG.add_node(vertice)
+        
+        for arista in lista_aristas:
+            self.grafoG.add_edge(arista[0],arista[1])
+
+    def dibujargrafo(self):
+        self.ax.clear()
+        nx.draw(self.grafoG, ax=self.ax, with_labels=True)
+        self.canvas.draw()
+
+    def busquedaAnchura(self):
+        lista_vertices=self.grafo.obtener_vertices()
+        lista_vertices_ordenada=sorted(lista_vertices)
+        #inicia siempre en orden ascendente por el vertice que esta primero en la lista
+        vertice_inicial=lista_vertices_ordenada[0]
+
+        self.axAnchura.clear()
+        bfs_edges=list(nx.bfs_edges(self.grafoG,source=vertice_inicial))
+        pos = nx.spring_layout(self.grafoG)
+        nx.draw(self.grafoG, pos=pos, ax=self.axAnchura, with_labels=True)
+        nx.draw_networkx_edges(self.grafoG, pos=pos, edgelist=bfs_edges, edge_color='#FFF05F', ax=self.axAnchura)
+        nx.draw_networkx_nodes(self.grafoG, pos=pos, nodelist=[vertice_inicial]+[v for u, v in bfs_edges], node_color='#FFF05F', ax=self.axAnchura)
+        self.canvasAnchura.draw()
+
+    def busquedaProdundidad(self):
+        lista_vertices=self.grafo.obtener_vertices()
+        lista_vertices_ordenada=sorted(lista_vertices)
+        #inicia siempre en orden ascendente por el vertice que esta primero en la lista
+        vertice_inicial=lista_vertices_ordenada[0]
+
+        self.axAnchura.clear()
+        dfs_edges=list(nx.dfs_edges(self.grafoG,source=vertice_inicial))
+        pos = nx.spring_layout(self.grafoG)
+        nx.draw(self.grafoG, pos=pos, ax=self.axAnchura, with_labels=True)
+        nx.draw_networkx_edges(self.grafoG, pos=pos, edgelist=dfs_edges, edge_color='#4CE27F', ax=self.axAnchura)
+        nx.draw_networkx_nodes(self.grafoG, pos=pos, nodelist=[vertice_inicial]+[v for u, v in dfs_edges], node_color='#4CE27F', ax=self.axAnchura)
+        self.canvasAnchura.draw()
+
+    '''
     def generarGrafo(self):
         lista_vertices=self.grafo.obtener_vertices()
         lista_aristas=self.grafo.obtener_aristas()
@@ -129,7 +193,6 @@ class Interfaz:
         nueva_imagen = imagen_grafo.resize((325, 325), Image.BILINEAR)
         nueva_imagen.save("imagenes/grafo_resized.png")
 
-
     def actualizarGrafo(self):
         imgGrafo=tk.PhotoImage(file="imagenes/grafo_resized.png")
         lbl_imgGrafo=tk.Label(self.frmFrameGrafo,image=imgGrafo)
@@ -140,16 +203,7 @@ class Interfaz:
             self.lbl_imgGrafo_anterior.destroy()
 
         self.lbl_imgGrafo_anterior = lbl_imgGrafo
-
-
-    #actualizara el arbol
-    def actualizarArbol(self):
-        frmArbol=tk.Frame(self.root,width=325, height=325,borderwidth=2, relief="ridge", bg="lightgrey")
-        frmArbol.place(x=400,y=20)
-        imgArbol=tk.PhotoImage(file="")
-        lbl_imgArbol=tk.Label(frmArbol,image=imgArbol)
-        lbl_imgArbol.image=imgArbol
-        lbl_imgArbol.pack()
+    '''
 
     
 
