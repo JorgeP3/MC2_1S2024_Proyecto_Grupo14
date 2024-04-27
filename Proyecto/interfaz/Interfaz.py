@@ -17,7 +17,7 @@ class Interfaz:
     def __init__(self,root:tk.Tk):
         self.root = root
         self.root.title("Ventana Principal")
-        self.root.geometry("800x600")
+        self.root.geometry("690x600")
         self.root.configure(bg="lightblue")
         self.grafo=Grafo()
         self.grafoG=nx.Graph()
@@ -28,17 +28,17 @@ class Interfaz:
         
         #FRAME GRAFO
         self.frmGrafo=tk.Frame(self.root,width=325, height=325,borderwidth=2, relief="ridge", bg="lightgrey")
-        self.frmGrafo.place(x=20,y=20)
+        self.frmGrafo.place(x=20,y=45)
 
         
         #FRAME arbol
         self.frmArbol=tk.Frame(self.root,width=325, height=325,borderwidth=2, relief="ridge", bg="lightgrey")
-        self.frmArbol.place(x=400,y=20)
+        self.frmArbol.place(x=340,y=45)
 
 
         #FRAME con los botones
-        frmControl=tk.Frame(self.root,width=600, height=200,borderwidth=2, relief="ridge", bg="lightgrey")
-        frmControl.place(x=100,y=360)
+        frmControl=tk.Frame(self.root,width=625, height=200,borderwidth=2, relief="ridge", bg="lightgrey")
+        frmControl.place(x=20,y=360)
 
         btnAgregarVertice=tk.Button(frmControl,text="Agregar Vértice",command=self.agregarVertice)
         btnAgregarVertice.place(x=10,y=20)
@@ -52,6 +52,24 @@ class Interfaz:
         btnBusquedaProdundidad=tk.Button(frmControl,text="Busqueda Produndidad",command=self.busquedaProdundidad)
         btnBusquedaProdundidad.place(x=10,y=150)
 
+        #labels
+        lblEntrada=tk.Label(self.root,text="Grafo",bg="lightblue",font="bold")
+        lblEntrada.place(x=135,y=15)
+
+        lblEntrada=tk.Label(self.root,text="Árbol",bg="lightblue",font="bold")
+        lblEntrada.place(x=450,y=15)
+
+
+        lblEntrada=tk.Label(frmControl,text="--",bg="lightgrey")
+        lblEntrada.place(x=147,y=60)
+
+        lblEntrada=tk.Label(frmControl,text="Vértices",bg="lightgrey")
+        lblEntrada.place(x=290,y=1)
+
+        lblEntrada=tk.Label(frmControl,text="Aristas",bg="lightgrey")
+        lblEntrada.place(x=440,y=1)
+
+        #entrys
         self.txtVertice=tk.Entry(frmControl,)
         self.txtVertice.place(x=105,y=20)
 
@@ -60,13 +78,11 @@ class Interfaz:
         self.txtVertice2=tk.Entry(frmControl,width=5)
         self.txtVertice2.place(x=170,y=60)
 
+        #listas
         self.txtListaVertices = tk.Listbox(frmControl,)
         self.txtListaVertices.place(x=250,y=20)
         self.txtListaAristas = tk.Listbox(frmControl,)
         self.txtListaAristas.place(x=400,y=20)
-
-        lblEntrada=tk.Label(frmControl,text="--",bg="lightgrey")
-        lblEntrada.place(x=147,y=60)
 
         #figura del grafo
         figure = Figure(figsize=(3,3))
@@ -74,8 +90,8 @@ class Interfaz:
         self.canvas=FigureCanvasTkAgg(figure, self.frmGrafo)
         self.canvas.get_tk_widget().pack()
 
-        #figura busqueda Anchura
-
+        #figura busqueda Anchura y produndidad, se graficaron ambos en el mismo lugar
+        #primero se hizo el de anchura por eso lo deje con ese nombre :v
         figureAnchura = Figure(figsize=(3,3))
         self.axAnchura = figureAnchura.add_subplot(111)
         self.canvasAnchura=FigureCanvasTkAgg(figureAnchura, self.frmArbol)
@@ -150,6 +166,7 @@ class Interfaz:
         nx.draw(self.grafoG, pos=pos, ax=self.axAnchura, with_labels=True)
         nx.draw_networkx_edges(self.grafoG, pos=pos, edgelist=bfs_edges, edge_color='#FFF05F', ax=self.axAnchura)
         nx.draw_networkx_nodes(self.grafoG, pos=pos, nodelist=[vertice_inicial]+[v for u, v in bfs_edges], node_color='#FFF05F', ax=self.axAnchura)
+        nx.draw_networkx_nodes(self.grafoG, pos=pos, nodelist=[vertice_inicial], node_color='#d9dfff', ax=self.axAnchura)
         self.canvasAnchura.draw()
 
     def busquedaProdundidad(self):
@@ -164,46 +181,9 @@ class Interfaz:
         nx.draw(self.grafoG, pos=pos, ax=self.axAnchura, with_labels=True)
         nx.draw_networkx_edges(self.grafoG, pos=pos, edgelist=dfs_edges, edge_color='#4CE27F', ax=self.axAnchura)
         nx.draw_networkx_nodes(self.grafoG, pos=pos, nodelist=[vertice_inicial]+[v for u, v in dfs_edges], node_color='#4CE27F', ax=self.axAnchura)
+        nx.draw_networkx_nodes(self.grafoG, pos=pos, nodelist=[vertice_inicial], node_color='#d9dfff', ax=self.axAnchura)
         self.canvasAnchura.draw()
 
-    '''
-    def generarGrafo(self):
-        lista_vertices=self.grafo.obtener_vertices()
-        lista_aristas=self.grafo.obtener_aristas()
-        #codigo_dot = "graph [width=800, height=600];\n"
-        codigo_dot="graph {\n node[shape=circle]\n"
-        codigo_dot+="rankdir=\"LR\""
-        for vertice in lista_vertices:
-            codigo_dot+=vertice+"\n"
-
-        for arista in lista_aristas:
-            codigo_dot+=arista[0]+"--"+arista[1]+"\n"
-
-        #codigo_dot += "size=\"800,600\";\n" 
-        #codigo_dot+="graph [width=800, height=600];\n"
-        codigo_dot+="}"
-
-        with io.open('grafo.dot', 'w', encoding='utf-8') as archivo_dot:
-            archivo_dot.write(codigo_dot)
-
-        grafo=Source(codigo_dot)
-        grafo.render(filename='grafo', format='png', cleanup=True, directory="imagenes")
-
-        imagen_grafo = Image.open("imagenes/grafo.png")
-        nueva_imagen = imagen_grafo.resize((325, 325), Image.BILINEAR)
-        nueva_imagen.save("imagenes/grafo_resized.png")
-
-    def actualizarGrafo(self):
-        imgGrafo=tk.PhotoImage(file="imagenes/grafo_resized.png")
-        lbl_imgGrafo=tk.Label(self.frmFrameGrafo,image=imgGrafo)
-        lbl_imgGrafo.image=imgGrafo
-        lbl_imgGrafo.pack()
-
-        if hasattr(self, 'lbl_imgGrafo_anterior'):
-            self.lbl_imgGrafo_anterior.destroy()
-
-        self.lbl_imgGrafo_anterior = lbl_imgGrafo
-    '''
 
     
 
